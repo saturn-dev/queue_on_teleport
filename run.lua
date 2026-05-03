@@ -120,8 +120,14 @@ local function serverHop()
         return serverHop()
     end
 
-    local chosenServer = candidates[math.random(1, #candidates)]
-    print("🚀 Teleporting to server:", chosenServer)
+local chosenServer = candidates[math.random(1, #candidates)]
+print("🚀 Teleporting to server:", chosenServer)
+
+task.delay(3, function()
+    serverHop()
+end)
+
+
 
     local teleportFailed = false
     local teleportCheck = task.delay(10, function()
@@ -774,7 +780,7 @@ money.Changed:Connect(function(newValue)
     if not hopped and (newValue - previousMoney) == 750 then
         hopped = true
         print("Money went up by $750! Server hopping...")
-        task.wait(5)
+        task.wait(10)
         serverHop()
     end
     previousMoney = newValue
