@@ -162,6 +162,58 @@ while true do
         print("⚡ Crown Jewel is OPEN! Staying in this server.")
 HidePickingTeam()
 wait(1)
+
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local localPlayer = Players.LocalPlayer
+
+local WEBHOOK_URL = "YOUR_WEBHOOK_URL_HERE"
+local timeoutDuration = 150
+local hopped = false
+
+local function sendWebhook()
+    local data = HttpService:JSONEncode({
+        content = "**" .. localPlayer.Name .. "** Successfully robbed the Casino..."
+    })
+    pcall(function()
+        HttpService:PostAsync(WEBHOOK_URL, data, Enum.HttpContentType.ApplicationJson)
+    end)
+end
+
+repeat task.wait() until localPlayer:FindFirstChild("leaderstats") and localPlayer.leaderstats:FindFirstChild("Money")
+
+local money = localPlayer.leaderstats.Money
+local previousMoney = money.Value
+
+task.spawn(function()
+    local startTime = tick()
+
+    while not hopped do
+        task.wait(1)
+
+        local currentMoney = money.Value
+
+        if (currentMoney - previousMoney) == 750 then
+            hopped = true
+            print("Money went up by $750! Sending webhook and server hopping...")
+            sendWebhook()
+            task.wait(0.5)
+            serverHop()
+            break
+        end
+
+        previousMoney = currentMoney
+
+        if tick() - startTime >= timeoutDuration then
+            print("150 second timeout reached. Server hopping...")
+            hopped = true
+            serverHop()
+            break
+        end
+    end
+end)
+
+-- scripts below here will run immediately without waiting
         
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -759,38 +811,7 @@ end)
     end
 
 CasinoRob()
-wait(3)
 
-local Players = game:GetService("Players")
-local localPlayer = Players.LocalPlayer
-local money = localPlayer.leaderstats.Money
-
-local previousMoney = money.Value
-local timeoutDuration = 150 -- seconds
-local hopped = false
-
--- Watch for money increasing by 750
-money.Changed:Connect(function(newValue)
-    if not hopped and (newValue - previousMoney) == 750 then
-        hopped = true
-        print("Money went up by $750! Server hopping...")
-        serverHop()
-    end
-    previousMoney = newValue
-end)
-
--- 150 second timeout
-local startTime = tick()
-
-while not hopped do
-    if tick() - startTime >= timeoutDuration then
-        print("150 second timeout reached. Server hopping...")
-        hopped = true
-        serverHop()
-        break
-    end
-    task.wait(1)
-end
 
 
         break
