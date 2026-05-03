@@ -760,64 +760,37 @@ end)
 
 CasinoRob()
 wait(3)
+
 local Players = game:GetService("Players")
-
 local localPlayer = Players.LocalPlayer
-local targetMessage = localPlayer.Name .. " stole $750 from the Crown Jewel!"
-local timeoutDuration = 200 -- seconds
+local money = localPlayer.leaderstats.Money
 
--- Listen to chat messages
-local function connectChat()
-    local success, err = pcall(function()
-        if game:GetService("TextChatService").ChatVersion == Enum.ChatVersion.TextChatService then
-            -- New TextChatService
-            game:GetService("TextChatService").MessageReceived:Connect(function(msg)
-                if msg.Text == targetMessage then
-                    print("Target message detected! Server hopping...")
-                    serverHop()
-                end
-            end)
-        else
-            -- Legacy chat
-            for _, player in pairs(Players:GetPlayers()) do
-                player.Chatted:Connect(function(msg)
-                    if msg == targetMessage then
-                        print("Target message detected! Server hopping...")
-                        serverHop()
-                    end
-                end)
-            end
-            Players.PlayerAdded:Connect(function(player)
-                player.Chatted:Connect(function(msg)
-                    if msg == targetMessage then
-                        print("Target message detected! Server hopping...")
-                        serverHop()
-                    end
-                end)
-            end)
-        end
-    end)
+local previousMoney = money.Value
+local timeoutDuration = 150 -- seconds
+local hopped = false
 
-    if not success then
-        warn("Chat hook error: " .. tostring(err))
+-- Watch for money increasing by 750
+money.Changed:Connect(function(newValue)
+    if not hopped and (newValue - previousMoney) == 750 then
+        hopped = true
+        print("Money went up by $750! Server hopping...")
+        serverHop()
     end
-end
+    previousMoney = newValue
+end)
 
-connectChat()
-
--- Timeout countdown
+-- 150 second timeout
 local startTime = tick()
 
-while true do
-    local elapsed = tick() - startTime
-    if elapsed >= timeoutDuration then
-        print("200 second timeout reached. Server hopping...")
+while not hopped do
+    if tick() - startTime >= timeoutDuration then
+        print("150 second timeout reached. Server hopping...")
+        hopped = true
         serverHop()
         break
     end
     task.wait(1)
 end
-
 
 
         break
