@@ -61,12 +61,35 @@ local function isPowerPlantOpen()
     local status = powerPlantValue.Value
     return status == ENUM_STATUS.OPENED or status == ENUM_STATUS.STARTED
 end
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
 local function HidePickingTeam()
-	local TeamChooseUI = require(game:GetService("ReplicatedStorage").TeamSelect.TeamChooseUI)
+    local Players = game:GetService("Players")
+    local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
+    local player = Players.LocalPlayer
+    local playerGui = player:WaitForChild("PlayerGui")
 
-	repeat task.wait() pcall(function() TeamChooseUI.Hide() end) until playerGui:FindFirstChild("TeamSelectGui") == nil or playerGui:FindFirstChild("TeamSelectGui").Enabled == false or game:GetService("Players").LocalPlayer.TeamColor == BrickColor.new("Bright red") or player.Character.Humanoid.Health <= 0
+    local teamSelectFolder = ReplicatedStorage:WaitForChild("TeamSelect", 10)
+    if not teamSelectFolder then return end
+
+    local TeamChooseUI = require(teamSelectFolder:WaitForChild("TeamChooseUI", 10))
+
+    repeat
+        task.wait()
+        pcall(function()
+            TeamChooseUI.Hide()
+        end)
+    until
+        not playerGui:FindFirstChild("TeamSelectGui")
+        or not playerGui.TeamSelectGui.Enabled
+        or player.TeamColor == BrickColor.new("Bright red")
+        or (player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health <= 0)
 end
+
+
 --== Server hopping logic using Raise API ==--
 local function serverHop()
     print("🌐 Crown Jewel closed, searching for new server...")
@@ -736,7 +759,64 @@ end)
     end
 
 CasinoRob()
+wait(3)
+local Players = game:GetService("Players")
 
+local localPlayer = Players.LocalPlayer
+local targetMessage = localPlayer.Name .. " stole $750 from the Crown Jewel!"
+local timeoutDuration = 200 -- seconds
+
+-- Listen to chat messages
+local function connectChat()
+    local success, err = pcall(function()
+        if game:GetService("TextChatService").ChatVersion == Enum.ChatVersion.TextChatService then
+            -- New TextChatService
+            game:GetService("TextChatService").MessageReceived:Connect(function(msg)
+                if msg.Text == targetMessage then
+                    print("Target message detected! Server hopping...")
+                    serverHop()
+                end
+            end)
+        else
+            -- Legacy chat
+            for _, player in pairs(Players:GetPlayers()) do
+                player.Chatted:Connect(function(msg)
+                    if msg == targetMessage then
+                        print("Target message detected! Server hopping...")
+                        serverHop()
+                    end
+                end)
+            end
+            Players.PlayerAdded:Connect(function(player)
+                player.Chatted:Connect(function(msg)
+                    if msg == targetMessage then
+                        print("Target message detected! Server hopping...")
+                        serverHop()
+                    end
+                end)
+            end)
+        end
+    end)
+
+    if not success then
+        warn("Chat hook error: " .. tostring(err))
+    end
+end
+
+connectChat()
+
+-- Timeout countdown
+local startTime = tick()
+
+while true do
+    local elapsed = tick() - startTime
+    if elapsed >= timeoutDuration then
+        print("200 second timeout reached. Server hopping...")
+        serverHop()
+        break
+    end
+    task.wait(1)
+end
 
 
 
