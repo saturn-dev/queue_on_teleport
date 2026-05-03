@@ -89,8 +89,31 @@ local function HidePickingTeam()
         or (player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health <= 0)
 end
 task.spawn(function()
-        print("stating 250s killswitch...")
-    task.wait(250)
+    print("starting 120s killswitch...")
+
+    local Players = game:GetService("Players")
+    local localPlayer = Players.LocalPlayer
+    local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+
+    -- Death check
+    humanoid.Died:Connect(function()
+        print("Player died. Server hopping...")
+        serverHop()
+    end)
+
+    -- Also handle respawn giving a new character
+    localPlayer.CharacterAdded:Connect(function(newChar)
+        local newHumanoid = newChar:WaitForChild("Humanoid")
+        newHumanoid.Died:Connect(function()
+            print("Player died. Server hopping...")
+            serverHop()
+        end)
+    end)
+
+    -- 120s timeout
+    task.wait(120)
+    print("120s killswitch triggered. Server hopping...")
     serverHop()
 end)
 
