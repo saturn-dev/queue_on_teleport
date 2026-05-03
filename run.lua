@@ -89,7 +89,7 @@ local function HidePickingTeam()
         or (player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health <= 0)
 end
 task.spawn(function()
-    print("starting 120s killswitch...")
+    print("new starting 120s killswitch...")
 
     local Players = game:GetService("Players")
     local localPlayer = Players.LocalPlayer
