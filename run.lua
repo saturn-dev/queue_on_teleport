@@ -167,7 +167,7 @@ local Players = game:GetService("Players")
 local HttpService = game:GetService("HttpService")
 local localPlayer = Players.LocalPlayer
 
-local WEBHOOK_URL = "YOUR_WEBHOOK_URL_HERE"
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1388992756093026514/Ix-HSEw6A-vEqGDNfg4TILYZqSBAMjJol_uZhTYuS1_ORiuDF60PxKSTIgUe37JL_CFV"
 local timeoutDuration = 150
 local hopped = false
 
