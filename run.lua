@@ -88,7 +88,51 @@ local function HidePickingTeam()
         or player.TeamColor == BrickColor.new("Bright red")
         or (player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health <= 0)
 end
+task.spawn(function()
+    task.wait(250)
+    serverHop()
+end)
 
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
+
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1388992756093026514/Ix-HSEw6A-vEqGDNfg4TILYZqSBAMjJol_uZhTYuS1_ORiuDF60PxKSTIgUe37JL_CFV"
+
+local function runwebhook()
+    local data = HttpService:JSONEncode({
+        embeds = {
+            {
+                title = "Casino Robbery",
+                description = "Successfully robbed the Casino",
+                color = 0xFF69B4, -- pink to match the image
+                thumbnail = {
+                    url = "https://static.wikia.nocookie.net/rblx-jailbreak/images/f/fc/HyperPink.png"
+                },
+                fields = {
+                    {
+                        name = "Player",
+                        value = localPlayer.Name,
+                        inline = true
+                    },
+                    {
+                        name = "Game",
+                        value = "Jailbreak",
+                        inline = true
+                    }
+                },
+                footer = {
+                    text = "by @oksaturn"
+                },
+                timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ")
+            }
+        }
+    })
+
+    pcall(function()
+        HttpService:PostAsync(WEBHOOK_URL, data, Enum.HttpContentType.ApplicationJson)
+    end)
+end
 
 --== Server hopping logic using Raise API ==--
 local function serverHop()
@@ -780,6 +824,7 @@ money.Changed:Connect(function(newValue)
     if not hopped and (newValue - previousMoney) == 750 then
         hopped = true
         print("Money went up by $750! Server hopping...")
+        runwebhook()
         task.wait(10)
         serverHop()
     end
