@@ -89,7 +89,7 @@ local function HidePickingTeam()
         or (player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health <= 0)
 end
 task.spawn(function()
-    print("new starting 120s killswitch...")
+    print("starting 120s killswitch...")
 
     local Players = game:GetService("Players")
     local localPlayer = Players.LocalPlayer
@@ -595,66 +595,57 @@ local function CasinoRob()
             print("✅ [DEBUG] All computers processed.")
         end)
     end
-local function collectNearestCash()
-    task.spawn(function()
-        local lootFolder = Workspace:WaitForChild("Casino"):WaitForChild("Loots")
-        local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-        local root = character:WaitForChild("HumanoidRootPart")
 
-        -- Find 4 nearest CasinoCash items
-        local loots = lootFolder:GetDescendants()
-        local cashList = {}
+    local function collectNearestCash()
+        task.spawn(function()
+            local lootFolder = Workspace:WaitForChild("Casino"):WaitForChild("Loots")
+            local loots = lootFolder:GetDescendants()
 
-        for _, loot in ipairs(loots) do
-            if loot.Name == "Casino_Cash" then
-                local pos = loot:GetPivot().Position
-                local dist = (root.Position - pos).Magnitude
-                table.insert(cashList, {loot = loot, dist = dist})
+            -- Find nearest CasinoCash
+            local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+            local root = character:WaitForChild("HumanoidRootPart")
+            local nearest, nearestDist
+
+            for _, loot in ipairs(loots) do
+                if loot.Name == "Casino_Cash" then
+                    local pos = loot:GetPivot().Position
+                    local dist = (root.Position - pos).Magnitude
+                    if not nearest or dist < nearestDist then
+                        nearest, nearestDist = loot, dist
+                    end
+                end
             end
-        end
 
-        -- Sort by distance
-        table.sort(cashList, function(a, b) return a.dist < b.dist end)
+            if not nearest then
+                warn("[DEBUG] No CasinoCash found in Workspace.Casino.Loots!")
+                return
+            end
 
-        if #cashList == 0 then
-            warn("[DEBUG] No CasinoCash found!")
-            return
-        end
+            print("[DEBUG] Nearest CasinoCash at:", nearest:GetPivot().Position)
 
-        -- Grab up to 4
-        local toCollect = math.min(4, #cashList)
-        print("[DEBUG] Collecting " .. toCollect .. " cash items...")
-
-        for i = 1, toCollect do
-            local entry = cashList[i]
-            local cash = entry.loot
-
-            print("[DEBUG] Moving to cash #" .. i .. " at:", cash:GetPivot().Position)
-
+            -- Lock to the cash position
             local stopSignal = Instance.new("BoolValue")
             stopSignal.Value = false
-            holdAtPosition(cash:GetPivot().Position, stopSignal)
+            holdAtPosition(nearest:GetPivot().Position, stopSignal)
 
-            local remote = cash:FindFirstChild("CasinoLootCollect")
+            -- Run CasinoLootCollect
+            local remote = nearest:FindFirstChild("CasinoLootCollect")
             if remote and remote:IsA("RemoteEvent") then
-                print("[DEBUG] Collecting cash #" .. i .. "...")
+                print("[DEBUG] Collecting CasinoCash for 5 seconds...")
                 local startTime = tick()
                 while tick() - startTime < 3 do
                     remote:FireServer()
                     task.wait(0.001)
                 end
-                print("[DEBUG] Finished collecting cash #" .. i)
+                print("[DEBUG] Finished collecting CasinoCash")
             else
-                warn("[DEBUG] CasinoLootCollect remote not found on cash #" .. i)
+                warn("[DEBUG] CasinoLootCollect remote not found under CasinoCash!")
             end
 
+            -- Stop holding position
             stopSignal.Value = true
-            task.wait(0.1)
-        end
-
-        print("[DEBUG] All cash collected.")
-    end)
-end
+        end)
+    end
 
     --== MAIN SEQUENCE ==--
 
