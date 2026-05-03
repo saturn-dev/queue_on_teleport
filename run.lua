@@ -567,7 +567,7 @@ local function CasinoRob()
                         -- Wait until team is Criminal
                         while LocalPlayer.Team == nil or LocalPlayer.Team.Name ~= "Criminal" do
                             print("[DEBUG] Waiting for Criminal team before hacking...")
-                            task.wait(1)
+                            task.wait(.4)
                             if isStarted() then break end  -- Added check for isStarted()
                         end
 
@@ -653,7 +653,6 @@ local function CasinoRob()
     --== MAIN SEQUENCE ==--
 
     hackAllComputers()
-    wait(1)
 
     -- Wait until robbery starts or all computers are processed
     while not isStarted() do
@@ -661,7 +660,7 @@ local function CasinoRob()
     end
 
     collectNearestCash()
-    task.wait(6)
+    task.wait(4)
 
     -- Define the target position as a CFrame
     local targetPosition = CFrame.new(1128.31506, 129.162865, 1300.4928)
