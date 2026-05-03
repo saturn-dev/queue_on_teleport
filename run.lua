@@ -598,7 +598,8 @@ local function CasinoRob()
 
             print("✅ [DEBUG] All computers processed.")
         end)
-    end  local function collectNearestCash()
+    end  
+    local function collectNearestCash()
         task.spawn(function()
             local lootFolder = Workspace:WaitForChild("Casino"):WaitForChild("Loots")
             local loots = lootFolder:GetDescendants()
@@ -652,6 +653,7 @@ local function CasinoRob()
     --== MAIN SEQUENCE ==--
 
     hackAllComputers()
+    wait(1)
 
     -- Wait until robbery starts or all computers are processed
     while not isStarted() do
@@ -659,7 +661,7 @@ local function CasinoRob()
     end
 
     collectNearestCash()
-    wait(3.5)
+    task.wait(6)
 
     -- Define the target position as a CFrame
     local targetPosition = CFrame.new(1128.31506, 129.162865, 1300.4928)
