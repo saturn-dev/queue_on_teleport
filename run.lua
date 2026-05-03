@@ -90,6 +90,7 @@ local function HidePickingTeam()
 end
 task.spawn(function()
     task.wait(250)
+    print("stating 250s killswitch...")
     serverHop()
 end)
 
@@ -100,12 +101,12 @@ local localPlayer = Players.LocalPlayer
 local WEBHOOK_URL = "https://discord.com/api/webhooks/1388992756093026514/Ix-HSEw6A-vEqGDNfg4TILYZqSBAMjJol_uZhTYuS1_ORiuDF60PxKSTIgUe37JL_CFV"
 
 local function runwebhook()
-    local data = HttpService:JSONEncode({
+    local data = game:GetService("HttpService"):JSONEncode({
         embeds = {
             {
                 title = "Casino Robbery",
                 description = "Successfully robbed the Casino",
-                color = 0xFF69B4, -- pink to match the image
+                color = 0xFF69B4,
                 thumbnail = {
                     url = "https://static.wikia.nocookie.net/rblx-jailbreak/images/f/fc/HyperPink.png"
                 },
@@ -130,7 +131,14 @@ local function runwebhook()
     })
 
     pcall(function()
-        HttpService:PostAsync(WEBHOOK_URL, data, Enum.HttpContentType.ApplicationJson)
+        request({
+            Url = WEBHOOK_URL,
+            Method = "POST",
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
+            Body = data
+        })
     end)
 end
 
