@@ -89,8 +89,8 @@ local function HidePickingTeam()
         or (player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health <= 0)
 end
 task.spawn(function()
+        print("stating 250s killswitch...")
     task.wait(250)
-    print("stating 250s killswitch...")
     serverHop()
 end)
 
