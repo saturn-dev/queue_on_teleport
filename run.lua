@@ -88,34 +88,7 @@ local function HidePickingTeam()
         or player.TeamColor == BrickColor.new("Bright red")
         or (player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health <= 0)
 end
-task.spawn(function()
-    print("starting 120s killswitch...")
 
-    local Players = game:GetService("Players")
-    local localPlayer = Players.LocalPlayer
-    local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
-    local humanoid = character:WaitForChild("Humanoid")
-
-    -- Death check
-    humanoid.Died:Connect(function()
-        print("Player died. Server hopping...")
-        serverHop()
-    end)
-
-    -- Also handle respawn giving a new character
-    localPlayer.CharacterAdded:Connect(function(newChar)
-        local newHumanoid = newChar:WaitForChild("Humanoid")
-        newHumanoid.Died:Connect(function()
-            print("Player died. Server hopping...")
-            serverHop()
-        end)
-    end)
-
-    -- 120s timeout
-    task.wait(120)
-    print("120s killswitch triggered. Server hopping...")
-    serverHop()
-end)
 
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
@@ -202,7 +175,34 @@ task.delay(3, function()
     serverHop()
 end)
 
+task.spawn(function()
+    print("starting 120s killswitch...")
 
+    local Players = game:GetService("Players")
+    local localPlayer = Players.LocalPlayer
+    local character = localPlayer.Character or localPlayer.CharacterAdded:Wait()
+    local humanoid = character:WaitForChild("Humanoid")
+
+    -- Death check
+    humanoid.Died:Connect(function()
+        print("Player died. Server hopping...")
+        serverHop()
+    end)
+
+    -- Also handle respawn giving a new character
+    localPlayer.CharacterAdded:Connect(function(newChar)
+        local newHumanoid = newChar:WaitForChild("Humanoid")
+        newHumanoid.Died:Connect(function()
+            print("Player died. Server hopping...")
+            serverHop()
+        end)
+    end)
+
+    -- 120s timeout
+    task.wait(120)
+    print("120s killswitch triggered. Server hopping...")
+    serverHop()
+end)
 
     local teleportFailed = false
     local teleportCheck = task.delay(10, function()
@@ -594,9 +594,7 @@ local function CasinoRob()
 
             print("✅ [DEBUG] All computers processed.")
         end)
-    end
-
-    local function collectNearestCash()
+    end  local function collectNearestCash()
         task.spawn(function()
             local lootFolder = Workspace:WaitForChild("Casino"):WaitForChild("Loots")
             local loots = lootFolder:GetDescendants()
