@@ -595,57 +595,66 @@ local function CasinoRob()
             print("✅ [DEBUG] All computers processed.")
         end)
     end
+local function collectNearestCash()
+    task.spawn(function()
+        local lootFolder = Workspace:WaitForChild("Casino"):WaitForChild("Loots")
+        local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+        local root = character:WaitForChild("HumanoidRootPart")
 
-    local function collectNearestCash()
-        task.spawn(function()
-            local lootFolder = Workspace:WaitForChild("Casino"):WaitForChild("Loots")
-            local loots = lootFolder:GetDescendants()
+        -- Find 4 nearest CasinoCash items
+        local loots = lootFolder:GetDescendants()
+        local cashList = {}
 
-            -- Find nearest CasinoCash
-            local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-            local root = character:WaitForChild("HumanoidRootPart")
-            local nearest, nearestDist
-
-            for _, loot in ipairs(loots) do
-                if loot.Name == "Casino_Cash" then
-                    local pos = loot:GetPivot().Position
-                    local dist = (root.Position - pos).Magnitude
-                    if not nearest or dist < nearestDist then
-                        nearest, nearestDist = loot, dist
-                    end
-                end
+        for _, loot in ipairs(loots) do
+            if loot.Name == "Casino_Cash" then
+                local pos = loot:GetPivot().Position
+                local dist = (root.Position - pos).Magnitude
+                table.insert(cashList, {loot = loot, dist = dist})
             end
+        end
 
-            if not nearest then
-                warn("[DEBUG] No CasinoCash found in Workspace.Casino.Loots!")
-                return
-            end
+        -- Sort by distance
+        table.sort(cashList, function(a, b) return a.dist < b.dist end)
 
-            print("[DEBUG] Nearest CasinoCash at:", nearest:GetPivot().Position)
+        if #cashList == 0 then
+            warn("[DEBUG] No CasinoCash found!")
+            return
+        end
 
-            -- Lock to the cash position
+        -- Grab up to 4
+        local toCollect = math.min(4, #cashList)
+        print("[DEBUG] Collecting " .. toCollect .. " cash items...")
+
+        for i = 1, toCollect do
+            local entry = cashList[i]
+            local cash = entry.loot
+
+            print("[DEBUG] Moving to cash #" .. i .. " at:", cash:GetPivot().Position)
+
             local stopSignal = Instance.new("BoolValue")
             stopSignal.Value = false
-            holdAtPosition(nearest:GetPivot().Position, stopSignal)
+            holdAtPosition(cash:GetPivot().Position, stopSignal)
 
-            -- Run CasinoLootCollect
-            local remote = nearest:FindFirstChild("CasinoLootCollect")
+            local remote = cash:FindFirstChild("CasinoLootCollect")
             if remote and remote:IsA("RemoteEvent") then
-                print("[DEBUG] Collecting CasinoCash for 5 seconds...")
+                print("[DEBUG] Collecting cash #" .. i .. "...")
                 local startTime = tick()
                 while tick() - startTime < 3 do
                     remote:FireServer()
                     task.wait(0.001)
                 end
-                print("[DEBUG] Finished collecting CasinoCash")
+                print("[DEBUG] Finished collecting cash #" .. i)
             else
-                warn("[DEBUG] CasinoLootCollect remote not found under CasinoCash!")
+                warn("[DEBUG] CasinoLootCollect remote not found on cash #" .. i)
             end
 
-            -- Stop holding position
             stopSignal.Value = true
-        end)
-    end
+            task.wait(0.1)
+        end
+
+        print("[DEBUG] All cash collected.")
+    end)
+end
 
     --== MAIN SEQUENCE ==--
 
