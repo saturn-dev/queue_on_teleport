@@ -400,6 +400,8 @@ local function CasinoRob()
         print("🔥 Crown Jewel robbery has STARTED!")
     else
         print("❌ Crown Jewel is closed.")
+        wait(1)
+        serverHop()
     end
 
     local function firePrisonerEvent()
