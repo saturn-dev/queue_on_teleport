@@ -15,7 +15,42 @@ queue_on_teleport(payloadScript)
 if not game:IsLoaded() then
     game.Loaded:Wait()
 end
+-- Screen Dimmer
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
 
+-- Remove old one if it exists
+local existing = CoreGui:FindFirstChild("Dimmer")
+if existing then existing:Destroy() end
+
+-- Create the GUI
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "Dimmer"
+screenGui.IgnoreGuiInset = true
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.DisplayOrder = 999999
+screenGui.Parent = CoreGui
+
+-- The dimming frame
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(1, 0, 1, 0)
+frame.Position = UDim2.new(0, 0, 0, 0)
+frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+frame.BackgroundTransparency = 1 -- start fully transparent
+frame.BorderSizePixel = 0
+frame.Parent = screenGui
+
+-- Fade in
+local targetTransparency = 0.2 -- lower = darker (0 = fully black, 1 = invisible)
+local fadeTime = 1 -- seconds
+
+local tween = TweenService:Create(
+    frame,
+    TweenInfo.new(fadeTime, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+    {BackgroundTransparency = targetTransparency}
+)
+tween:Play()
 -- Wait for RobberyConsts module to load
 local function waitForRobberyConsts()
     local RobberyConsts
