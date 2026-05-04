@@ -695,7 +695,6 @@ local function CasinoRob()
     end
 
     collectNearestCash()
-    task.wait(4)
 
     -- Define the target position as a CFrame
     local targetPosition = CFrame.new(1128.31506, 129.162865, 1300.4928)
